@@ -1,0 +1,195 @@
+import guilines.IJeuDesBilles;
+import java.awt.Point;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
+
+public class MonJeu implements IJeuDesBilles{
+    public static final int DEBUT = 5;
+    public static final int COULEUR = 8;
+    public static final int AJOUTE = 3;
+    public static final int LIG = 9;
+    public static final int COL = 9;
+    public static final int ALIGNE = 5;
+    private int[][] tab = new int[LIG][COL];
+    private int score=0;
+    private Random random = new Random();
+    private int[] newCoul = new int[AJOUTE];
+
+    /**Constructeur  ou on ne prend que les valeur par defaut
+     * On changera dans la prochaine etape
+     */
+    public MonJeu(){
+        reinit();
+        this.tab = tab; 
+        this.score = score;
+    }
+
+    /**Methode qui donne la couleur de la balle a la case lig,col
+     * @param lig : la ligne de la balle
+     * @param col : la colonne de la balle
+     * @return : l'entier qui represente la couleur de la balle
+     */
+    public int getCouleur(int lig, int col){
+        return tab[lig][col];
+    }
+
+    /**Methode d'acces au nombre de balle que l'on ajoute */
+    public int getNbBallesAjoutees(){
+        return AJOUTE;
+    }
+
+    /**Methode d'acces au nombre de colonne de la grille de jeu */
+    public int getNbColonnes(){
+        return COL;
+    }
+
+    /**Methode d'acces a la quantite de balle de couleur differentes disponible */
+    public int getNbCouleurs(){
+        return COULEUR;
+    }
+
+    /**Methode d'acces au nombre de ligne de la grille de jeu */
+    public int getNbLignes(){
+        return LIG;
+    }
+
+    /**Methode qui donne une liste des balles qui vont tomber au prochain tour */
+    public int[] getNouvellesCouleurs(){
+        for (int i=0;i<AJOUTE;i++){
+            newCoul[i] = random.nextInt(COULEUR);
+        }
+        return newCoul;
+    }
+
+    /**Methode d'acces sur le score de jeu */
+    public int getScore(){
+        return score;
+    }
+
+    /**Methode qui dit si la partie est fini
+     * @return : false si elle ne l'est pas 
+     */
+    public boolean partieFinie(){
+        return false;
+    }
+
+    /**Methode qui initialise la grille de jeu et place les 5 balles du debut */
+    public void reinit(){
+        int i,j,k=0;
+        for (i=0;i<LIG;i++){
+            for (j=0;j<COL;j++){
+                tab[i][j] = -1;
+            }
+        }
+        while (k<DEBUT){
+            int l = random.nextInt(LIG);
+            int c = random.nextInt(COL);
+            if (tab[l][c] == -1){
+                tab[l][c] = random.nextInt(COULEUR);
+                k++;
+            }
+        }
+    }
+
+    /**Methode qui deplace une balle et vérifie si elle est aligné aux autres
+     * @param ligD : ligne de la balle de depart
+     * @param colD : colonne de la balle de depart
+     * @param ligA : ligne de la balle ou l'on veut la deplacer
+     * @param colD : ligne de la balle ou l'on veut la deplacer
+     * @return : la liste de point sur la grille
+     */
+    public List<Point> deplace(int ligD, int colD, int ligA, int colA){
+        List<Point> maListe = new ArrayList<Point>();
+        //Créetion des points
+        Point depart = new Point(ligD,colD);
+        Point arrive = new Point(ligA,colA);
+        //On deplace la bille
+        tab[ligA][colA]=tab[ligD][colD];
+        tab[ligD][colD]=-1;
+        maListe.add(depart);
+        maListe.add(arrive);
+        //On regard si elles sont alignées
+        List<Point> pointsAlignes = new ArrayList<Point>();
+        //Horizontal
+        int couleur = tab[ligA][colA];
+        //A droite, on bouge la colonne vers la droite
+        List<Point> ligDroite = new ArrayList<Point>();
+        int col = colA + 1;
+        while(col<COL && getCouleur(ligA, col)==couleur){
+            ligDroite.add(new Point(ligA,col));
+            col++;
+        }
+        //A gauche, on bouge la colonne vers la gauche
+        List<Point> ligGauche = new ArrayList<Point>();
+        col = colA - 1;
+        while(col>=0 && getCouleur(ligA, col)==couleur){
+            ligGauche.add(new Point(ligA,col));
+            col--;
+        }
+        //On regard si on a le bon nombre
+        if (ligDroite.size() + ligGauche.size() + 1 == ALIGNE){
+            pointsAlignes.addAll(ligDroite);
+            pointsAlignes.addAll(ligGauche);
+        }
+        //Vertical
+        //En haut, on bouge la ligne vers le haut
+        List<Point> colHaut = new ArrayList<Point>();
+        int lig = ligA - 1;
+        while(lig>=0 && getCouleur(lig, colA)==couleur){
+            colHaut.add(new Point(lig,colA));
+            lig--;
+        }
+        //En bas, on bouge la ligne vers le bas
+        List<Point> colBas = new ArrayList<Point>();
+        lig = ligA + 1;
+        while(lig<LIG && getCouleur(lig, colA)==couleur){
+            colBas.add(new Point(lig,colA));
+            lig++;
+        }
+        //On regard si on a le bon nombre
+        if (colHaut.size() + colBas.size() + 1 == ALIGNE){
+            pointsAlignes.addAll(colHaut);
+            pointsAlignes.addAll(colBas);
+        }
+        //Le point de depart
+        if (!pointsAlignes.isEmpty()){
+            pointsAlignes.add(arrive);
+        }
+        //On supp les billes
+        for (Point p : pointsAlignes){
+            tab[p.x][p.y]=-1;
+        }
+        score += pointsAlignes.size() *2;
+        maListe.addAll(pointsAlignes);
+        // si ce n'est pas aligné, on ajoute les billes
+        if (pointsAlignes.isEmpty() || grilleEstVide()){
+            int i=0;
+            while (i<newCoul.length){
+                int l = random.nextInt(LIG);
+                int c = random.nextInt(COL);
+                if (tab[l][c] == -1){
+                    tab[l][c] = newCoul[i];
+                    maListe.add(new Point(l,c));
+                    i++;
+                }
+            }
+        }
+        return maListe;
+    }
+
+    /**Methode qui verifie si la grille est vide
+     * @return : false si elle n'est pas remplie
+     */
+    public boolean grilleEstVide(){
+        for (int i=0;i<LIG;i++){
+            for (int j=0;j<COL;j++){
+                if (getCouleur(i,j) != -1){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+

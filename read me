@@ -1,0 +1,20 @@
+Etape 4 :
+*Extenssion de la methode deplace pour retirer les billes alignées
+
+Etape5
+*Création de la class Bille pour modéliser une case du tableau
+*Ecriture de la methode partieFinie
+*creation de methode pour reduire le code de la methode deplace
+ 
+
+ Etape6
+ *Dans la classe Bille: Ajout de l'attribut voisins et de la methode trouverChemin
+ *Dans la classe monJeu:
+ Dans la methode reinit : initialisation des voisins avec la methode chercheVoisin
+ Dans la methode deplace : ajout de la condition "trouverChemin" pour deplacer la bille
+ 
+ Etape7: Pour aller plus loin
+ *Ajoute des Signature des methode
+ *Dans la methode laLigne: le nombre de bille a aligné est un minimum et non un minimum et maximum
+ *Ajout d'un constructeur de jeu, on peut maintenant choisir la taille du tableau, le nombre de couleur et le nombre de bille a ajouter et a aligner
+ *Changement de la formule du score, plus on supprime de bille plus on gagne de point
